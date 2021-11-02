@@ -7,9 +7,11 @@ from PySide2.QtCore import QObject, Signal, Slot
 
 class CommunicationTCP(QObject):
     getIncomingConnection = Signal(str)
+    getMessageData = Signal(str)
 
     def __init__(self):
-        print("Commumication created")
+        super(CommunicationTCP, self).__init__()
+        print("COMM : Commumication created")
         self.host = '127.0.0.1'
         self.port = 5556
 
@@ -20,6 +22,7 @@ class CommunicationTCP(QObject):
 
         self.is_server_running = False
         self.is_server_connected_to_client = False
+        self.is_server_allowed_connected_to_client = False
 
         self.connect_client_thread = None
         self.listen_client_thread = None
@@ -30,11 +33,12 @@ class CommunicationTCP(QObject):
 
         self.data = None
         self.data_mtx = Lock()
+        self.param_mtx = Lock()
 
         self.initSocket()
         self.startServer()
 
-        self.connectToServer()
+        # self.connectToServer()
 
     def initSocket(self):
         self.socket_tcp_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,7 +53,7 @@ class CommunicationTCP(QObject):
         self.server_thread.start()
 
     def startServerThread(self):
-        print("WAITING FOR CONNECTION")
+        print("COMM : WAITING FOR CONNECTION")
         self.socket_tcp_server.bind((self.host, self.port))
         while self.is_server_running:
             if not self.is_server_connected_to_client:
@@ -58,9 +62,9 @@ class CommunicationTCP(QObject):
                     self.conn_tcp, self.addr_tcp = self.socket_tcp_server.accept()
                     print('Connected by', self.addr_tcp)
                     self.is_server_connected_to_client = True
-                    self.getIncomingConnection.emit(self.addr_tcp)
+                    self.getIncomingConnection.emit(self.addr_tcp[0])
                 except:
-                    print("Timeout Waiting")
+                    print("COMM : Timeout Waiting")
                     self.is_server_connected_to_client = False
                 self.counter_timeout = 0
                 time.sleep(0.5)
@@ -68,6 +72,8 @@ class CommunicationTCP(QObject):
                 self.data_mtx.acquire()
                 data = self.conn_tcp.recv(1024)
                 self.data_mtx.release()
+
+                self.getMessageData.emit(data.decode())
 
                 if len(data) <= 0:
                     self.counter_timeout += 1
@@ -79,10 +85,15 @@ class CommunicationTCP(QObject):
                     continue
 
                 print(data)
-                self.conn_tcp.sendall(data)
+                # self.conn_tcp.sendall(data)
                 time.sleep(0.1)
 
-
+    @Slot(str)
+    def sendMessageToClient(self, msg):
+        print("COMM : SENDING FROM GUI", msg)
+        if self.is_server_connected_to_client:
+            self.conn_tcp.sendall(msg.encode())
+        pass
 
 
     def listenFromServer(self):
@@ -98,7 +109,7 @@ class CommunicationTCP(QObject):
                 self.socket_tcp_client.connect((self.ip_to_connect, self.port_to_connect))
                 self.is_client_connected_to_server = True
             except:
-                print("Client gagal Konek ke Server")
+                print("COMM : Client gagal Konek ke Server")
                 self.is_client_connected_to_server = False
                 # self.socket_tcp_client.close()
 
@@ -115,20 +126,35 @@ class CommunicationTCP(QObject):
 
     def startListeningToServerThread(self):
         while self.is_client_running and self.is_client_connected_to_server and not self.is_server_connected_to_client:
-            msg_to_send = "init conn"
+            msg_to_send = "COMM : init conn"
             try:
                 self.socket_tcp_client.sendall(msg_to_send.encode())
                 data = self.socket_tcp_client.recv(1024)
             except:
-                print("ERROR send")
+                print("COMM : ERROR send")
                 self.socket_tcp_client.close()
                 self.is_client_connected_to_server = False
                 self.initSocket()
                 self.connectToServer()
                 break
 
-            print('Received client', (data).decode())
+            print('COMM : Received client', (data).decode())
             time.sleep(0.1)
+
+    @Slot(str)
+    def changeHostToConnect(self, host_ip):
+        self.param_mtx.acquire()
+        self.ip_to_connect = str(host_ip)
+        print("COMM :", "host ip changed to" ,host_ip)
+        self.param_mtx.release()
+
+    @Slot(str)
+    def changePortToConnect(self, host_port):
+        self.param_mtx.acquire()
+        self.port_to_connect = int(host_port)
+        print("COMM :", "host port changed to", host_port)
+        self.param_mtx.release()
+
 
 # print("OPENED APP")
 # comm = CommunicationTCP()
