@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Chat Dengan DES</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -28,7 +28,13 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="host_lineEdit"/>
+          <widget class="QLineEdit" name="host_lineEdit">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -42,7 +48,16 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="port_lineEdit"/>
+          <widget class="QLineEdit" name="port_lineEdit">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>5557</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -69,7 +84,15 @@
          <item row="0" column="1">
           <widget class="QLineEdit" name="myhost_ip_lineEdit">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -85,9 +108,25 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="myport_lineEdit"/>
+          <widget class="QLineEdit" name="myport_lineEdit">
+           <property name="font">
+            <font>
+             <pointsize>11</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>5556</string>
+           </property>
+          </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QPushButton" name="disconnect_all_pushButton">
+         <property name="text">
+          <string>Disconnect All</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -95,16 +134,16 @@
       <widget class="QTextBrowser" name="message_textBrowser">
        <property name="font">
         <font>
-         <pointsize>14</pointsize>
+         <pointsize>12</pointsize>
         </font>
        </property>
        <property name="html">
         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:14pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;ASDSADSA&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu';&quot;&gt;dddddd&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:12pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:14pt;&quot;&gt;ASDSADSA&lt;/span&gt;&lt;/p&gt;
+&lt;p align=&quot;right&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Ubuntu'; font-size:14pt;&quot;&gt;dddddd&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
       </widget>
      </item>
@@ -126,6 +165,11 @@ p, li { white-space: pre-wrap; }
            <width>16777215</width>
            <height>50</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
          </property>
         </widget>
        </item>

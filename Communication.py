@@ -35,17 +35,21 @@ class CommunicationTCP(QObject):
         self.data_mtx = Lock()
         self.param_mtx = Lock()
 
-        self.initSocket()
+        self.initSocketServer()
+        self.initSocketClient()
         self.startServer()
 
         # self.connectToServer()
 
-    def initSocket(self):
+    def initSocketServer(self):
         self.socket_tcp_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket_tcp_server.settimeout(1)
+        # print("COMM : Server binding into port", self.port)
+        self.socket_tcp_server.bind((self.host, self.port))
 
+    def initSocketClient(self):
         self.socket_tcp_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket_tcp_client.settimeout(1)
+        self.socket_tcp_client.settimeout(2)
 
     def startServer(self):
         self.server_thread = Thread(target=self.startServerThread)
@@ -53,10 +57,11 @@ class CommunicationTCP(QObject):
         self.server_thread.start()
 
     def startServerThread(self):
-        print("COMM : WAITING FOR CONNECTION")
-        self.socket_tcp_server.bind((self.host, self.port))
+        print("COMM : SERVER WAITING FOR CONNECTION")
+
         while self.is_server_running:
             if not self.is_server_connected_to_client:
+                self.initSocketServer()
                 try:
                     self.socket_tcp_server.listen()
                     self.conn_tcp, self.addr_tcp = self.socket_tcp_server.accept()
@@ -64,8 +69,9 @@ class CommunicationTCP(QObject):
                     self.is_server_connected_to_client = True
                     self.getIncomingConnection.emit(self.addr_tcp[0])
                 except:
-                    print("COMM : Timeout Waiting")
+                    print("COMM : SERVER Timeout Waiting")
                     self.is_server_connected_to_client = False
+                    self.socket_tcp_server.close()
                 self.counter_timeout = 0
                 time.sleep(0.5)
             else:
@@ -86,20 +92,37 @@ class CommunicationTCP(QObject):
 
                 print(data)
                 # self.conn_tcp.sendall(data)
-                time.sleep(0.1)
+                time.sleep(0.05)
+        print("COMM : server closed")
+        self.socket_tcp_server.close()
 
     @Slot(str)
-    def sendMessageToClient(self, msg):
-        print("COMM : SENDING FROM GUI", msg)
+    def sendMessage(self, msg):
+        pass
         if self.is_server_connected_to_client:
-            self.conn_tcp.sendall(msg.encode())
+            self.sendMessageToClient(msg)
+        elif self.is_client_connected_to_server:
+            self.sendMessageToServer(msg)
+        else:
+            print("NO CONNECTED USER")
+
+    def sendMessageToClient(self, msg):
+        print("COMM : SERVER SENDING TO CLIENT FROM GUI", msg)
+        # if self.is_server_connected_to_client:
+        self.conn_tcp.sendall(msg.encode())
         pass
 
+    def sendMessageToServer(self, msg):
+        print("COMM : Client SENDING TO SERVER FROM GUI", msg)
+        # if self.is_server_connected_to_client:
+        self.socket_tcp_client.sendall(msg.encode())
+        # pass
 
     def listenFromServer(self):
         pass
 
     def connectToServer(self):
+        self.initSocketClient()
         self.connect_client_thread = Thread(target=self.connectToServerThread)
         self.connect_client_thread.start()
 
@@ -114,9 +137,11 @@ class CommunicationTCP(QObject):
                 # self.socket_tcp_client.close()
 
             if self.is_client_connected_to_server:
+                print("COMM : starting listening to server")
                 self.startListeningToServer()
                 break
             time.sleep(0.1)
+        # self.socket_tcp_client.close()
 
     def startListeningToServer(self):
         self.listen_client_thread = Thread(target=self.startListeningToServerThread)
@@ -126,20 +151,24 @@ class CommunicationTCP(QObject):
 
     def startListeningToServerThread(self):
         while self.is_client_running and self.is_client_connected_to_server and not self.is_server_connected_to_client:
-            msg_to_send = "COMM : init conn"
+            # msg_to_send = "COMM : init conn"
             try:
-                self.socket_tcp_client.sendall(msg_to_send.encode())
+                # self.socket_tcp_client.sendall(msg_to_send.encode())
                 data = self.socket_tcp_client.recv(1024)
+                print('COMM : Received client = ', (data).decode())
+                if len(data.decode()) > 0:
+                    self.getMessageData.emit(data.decode())
             except:
-                print("COMM : ERROR send")
-                self.socket_tcp_client.close()
-                self.is_client_connected_to_server = False
-                self.initSocket()
-                self.connectToServer()
-                break
+                print("COMM : Client ERROR recv")
+                # self.socket_tcp_client.close()
+                # self.is_client_connected_to_server = False
+                # self.initSocketClient()
+                # self.connectToServer()
+                # break
 
-            print('COMM : Received client', (data).decode())
-            time.sleep(0.1)
+            time.sleep(0.05)
+        print("COMM : Client closed")
+        self.socket_tcp_client.close()
 
     @Slot(str)
     def changeHostToConnect(self, host_ip):
@@ -155,6 +184,21 @@ class CommunicationTCP(QObject):
         print("COMM :", "host port changed to", host_port)
         self.param_mtx.release()
 
+    @Slot(str)
+    def changeMyPortToConnect(self, local_port):
+        self.param_mtx.acquire()
+        self.port = int(local_port)
+        print("COMM :", "Local port changed to", local_port)
+        self.param_mtx.release()
+
+    def disconnectAllComm(self):
+        print("COMM : STOPPING ALL COMM THREAD")
+        self.param_mtx.acquire()
+        self.is_server_running = False
+        self.is_client_running = False
+        self.is_client_connected_to_server = False
+        self.is_server_connected_to_client = False
+        self.param_mtx.release()
 
 # print("OPENED APP")
 # comm = CommunicationTCP()

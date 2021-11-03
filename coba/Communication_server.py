@@ -3,7 +3,7 @@ import time
 
 
 host = '127.0.0.1'
-port = 5557
+port = 7777
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # s.settimeout(1)
@@ -35,5 +35,6 @@ while True:
         continue
 
     print(data)
+
     conn.sendall(data)
     time.sleep(0.1)

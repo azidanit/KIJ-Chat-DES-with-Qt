@@ -24,6 +24,27 @@ class Gui(Ui_Form):
         self.alignment_msg = 0
         self.counter = 1
 
+        self.initGui()
+
+    def initGui(self):
+        # self.send_pushButton.setEnabled(False)
+
+        self.getLocalIpConnectedToNetwork()
+
+
+    def getLocalIpConnectedToNetwork(self):
+        import socket
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+
+        self.myhost_ip_lineEdit.setText(str(s.getsockname()[0]))
+
+        print(s.getsockname()[0])
+        s.close()
+
+
+
     def connectWidget(self):
         # self.send_pushButton.clicked.connect(self.sendMsg)
         # self.host_lineEdit.textChanged.connect(lambda x: print("TEXT HOST ", x))
@@ -43,8 +64,9 @@ class Gui(Ui_Form):
     def pushMsgToTextBrowser(self, msg, is_from_me):
         # self.message_textBrowser.text
         if is_from_me:
-            self.message_textBrowser.append(msg + str(self.counter))
+            self.message_textBrowser.append(msg)
             cursor = self.message_textBrowser.textCursor()
+            # font = self.message_textBrowser.font()
             textBlockFormat = cursor.blockFormat()
             textBlockFormat.setAlignment(QtCore.Qt.AlignRight)
             cursor.mergeBlockFormat(textBlockFormat)
@@ -52,7 +74,7 @@ class Gui(Ui_Form):
             print(msg)
 
         else:
-            self.message_textBrowser.append(msg + str(self.counter))
+            self.message_textBrowser.append(msg)
             cursor = self.message_textBrowser.textCursor()
             textBlockFormat = cursor.blockFormat()
             textBlockFormat.setAlignment(QtCore.Qt.AlignLeft)
