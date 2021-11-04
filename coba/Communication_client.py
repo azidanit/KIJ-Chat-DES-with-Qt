@@ -1,8 +1,8 @@
 import socket
 import time
 
-host = '127.0.0.1'
-port = 5556
+host = '192.168.50.139'
+port = 7777
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 while True:

@@ -12,7 +12,7 @@ class CommunicationTCP(QObject):
     def __init__(self):
         super(CommunicationTCP, self).__init__()
         print("COMM : Commumication created")
-        self.host = '127.0.0.1'
+        self.host = '0.0.0.0'
         self.port = 5556
 
         self.ip_to_connect = '127.0.0.1'
@@ -129,6 +129,7 @@ class CommunicationTCP(QObject):
     def connectToServerThread(self):
         while not self.is_client_connected_to_server and not self.is_server_connected_to_client:
             try:
+                print("COMM : Connecting to Server", self.ip_to_connect, self.port_to_connect)
                 self.socket_tcp_client.connect((self.ip_to_connect, self.port_to_connect))
                 self.is_client_connected_to_server = True
             except:
