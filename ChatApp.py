@@ -36,18 +36,29 @@ class ChatApp(QObject):
     def getAccRSAPubKey(self, list_key):
         print("APP: ",list_key)
         self.rsa.setAcrossPublicKey((int(list_key[1]), int(list_key[2])))
+        encrypted_msg = self.rsa.encryptMsg("DES_KEY" + self.des.getDesKey())
+        print("APP : SENDING DES KEY", self.des.getDesKey())
+        self.comm.sendMessage(encrypted_msg)
+
+    # def getDESKey(self, key_):
+    #     self.des.setDesKey(key_)
 
     def sendMessage(self, msg):
         print("APP : SENDING MSG TO ENC")
-        # encrypted_msg = self.des.encryptIntoString(msg)
-        encrypted_msg = self.rsa.encryptMsg(msg)
+        encrypted_msg = self.des.encryptIntoString(msg)
+        # encrypted_msg = self.rsa.encryptMsg(msg)
         self.comm.sendMessage(encrypted_msg)
         pass
 
     @Slot(str)
     def receiveMessage(self, msg):
         print("APP : RECEIVING MSG TO DEC")
-        # decrypted_msg = self.des.decryptIntoString(msg)
-        decrypted_msg = self.rsa.decryptMsg(msg)
-        self.ui.pushIncomingMsg(decrypted_msg)
+
+        decrypted_msg_for_key = self.rsa.decryptMsg(msg)
+        if decrypted_msg_for_key[:7] == "DES_KEY" and len(decrypted_msg_for_key) == 15:
+            print("APP : GET DECODED DES KEY", decrypted_msg_for_key[7:])
+            self.des.setDesKey(decrypted_msg_for_key[7:])
+        else:
+            decrypted_msg = self.des.decryptIntoString(msg)
+            self.ui.pushIncomingMsg(decrypted_msg)
         pass

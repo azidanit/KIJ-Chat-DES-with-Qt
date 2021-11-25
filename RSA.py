@@ -3,7 +3,7 @@ from prime_generator import *
 
 class RSA:
     def __init__(self):
-        self.prime_bit_size = 7
+        self.prime_bit_size = 11
 
         self.p_prime = generate_prime(self.prime_bit_size)
         self.q_prime = generate_prime(self.prime_bit_size)
@@ -20,7 +20,7 @@ class RSA:
         e = random.randint(2, self.phi - 1)
         while math.gcd(e, self.phi) != 1:
             e = random.randint(2, self.phi - 1)
-
+        print(self.phi)
         # find d for Private Key
         d = pow(e, -1, self.phi)
 

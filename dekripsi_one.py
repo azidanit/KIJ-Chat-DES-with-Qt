@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1Pl8AoB2WmBwyN8e3nR4xEcrFA6GVB4_c
 """
 
-def decryptDES(pt):
+def decryptDES(pt, key_str_="JUKIRDAN"):
 
     import math
     # convert ke list of bin dari ASCII
@@ -44,7 +44,7 @@ def decryptDES(pt):
         m=m+chr(x)
       return m
 
-    key_str = "JUKRIDAN"
+    key_str = key_str_
     # key_str = key_input
     bin_key_list = toBinary(key_str)
     bin_key_list

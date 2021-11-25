@@ -91,7 +91,7 @@ class CommunicationTCP(QObject):
 
                 if len(data_plain) > 0:
                     if data_plain[:7] == "RSA_KEY":
-                        print("GOT RSA KEY FROM CLIENT")
+                        print("COMM : GOT RSA KEY FROM CLIENT")
                         split_data = data_plain.split(',')
                         self.getAccRSAPubKey.emit(split_data)
                     else:
@@ -181,7 +181,7 @@ class CommunicationTCP(QObject):
                         print("GOT RSA KEY FROM SERVER")
                         split_data = data_plain.split(',')
                         self.getAccRSAPubKey.emit(split_data)
-                        self.sendMessageToServer("RSA_KEY," + str(self.public_key_rsa[0]) + "," + str(self.public_key_rsa[1]))
+                        # self.sendMessageToServer("RSA_KEY," + str(self.public_key_rsa[0]) + "," + str(self.public_key_rsa[1]))
                     else:
                         self.getMessageData.emit(data.decode())
             except:

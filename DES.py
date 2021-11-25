@@ -4,6 +4,19 @@ import dekripsi_one
 class DES:
     def __init__(self):
         pass
+        self.key_str_des = self._generateDesKey()
+
+    def _generateDesKey(self):
+        import string
+        import random
+        ran = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+        return ran
+
+    def setDesKey(self, key_):
+        self.key_str_des = key_
+
+    def getDesKey(self):
+        return self.key_str_des
 
     def encryptIntoString(self, msg_str):
         msg_chunk = self.splitIntoChunk(msg_str)
@@ -32,7 +45,8 @@ class DES:
             if " " != (all_dec[-pos_space]):
                 break
 
-        return all_dec[:-pos_space + 1]
+        # return all_dec[:-pos_space + 1]
+        return all_dec
 
     def splitIntoChunk(self, msg_to_split):
         # msg_to_encrpyt = "Aku sayang kamu Juliii, hehe terimakasih telah ada yaaaa"
@@ -65,13 +79,13 @@ class DES:
     def encryptChunkList(self, list_chunk):
         encrypted_chunk = []
         for i in list_chunk:
-            encrypted_chunk.append(str(enkripsi_one.encryptDES(i)))
+            encrypted_chunk.append(str(enkripsi_one.encryptDES(i, self.key_str_des)))
             # print(enkripsi_one.encryptDES(i))
         return encrypted_chunk
 
     def decryptChunkList(self, list_chunk):
         decrypted_chunk = []
         for i in list_chunk:
-            decrypted_chunk.append(dekripsi_one.decryptDES(i))
+            decrypted_chunk.append(dekripsi_one.decryptDES(i, self.key_str_des))
 
         return decrypted_chunk
