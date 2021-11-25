@@ -22,22 +22,6 @@ class Ui_Form(object):
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.DES_radioButton = QRadioButton(Form)
-        self.DES_radioButton.setObjectName(u"DES_radioButton")
-
-        self.horizontalLayout_2.addWidget(self.DES_radioButton)
-
-        self.RSA_radioButton = QRadioButton(Form)
-        self.RSA_radioButton.setObjectName(u"RSA_radioButton")
-        self.RSA_radioButton.setChecked(True)
-
-        self.horizontalLayout_2.addWidget(self.RSA_radioButton)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout_2)
-
         self.to_connect = QHBoxLayout()
         self.to_connect.setObjectName(u"to_connect")
         self.formLayout_3 = QFormLayout()
@@ -172,9 +156,7 @@ class Ui_Form(object):
     # setupUi
 
     def retranslateUi(self, Form):
-        Form.setWindowTitle(QCoreApplication.translate("Form", u"Chat Dengan Enkripsi", None))
-        self.DES_radioButton.setText(QCoreApplication.translate("Form", u"DES", None))
-        self.RSA_radioButton.setText(QCoreApplication.translate("Form", u"RSA", None))
+        Form.setWindowTitle(QCoreApplication.translate("Form", u"Chat Dengan DES", None))
         self.label_2.setText(QCoreApplication.translate("Form", u"Host", None))
         self.label.setText(QCoreApplication.translate("Form", u"Port", None))
         self.port_lineEdit.setText(QCoreApplication.translate("Form", u"5557", None))
