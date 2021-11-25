@@ -8,6 +8,7 @@ from PySide2.QtCore import QObject, Signal, Slot
 class CommunicationTCP(QObject):
     getIncomingConnection = Signal(str)
     getMessageData = Signal(str)
+    getAccRSAPubKey = Signal(object)
 
     def __init__(self):
         super(CommunicationTCP, self).__init__()
@@ -39,7 +40,11 @@ class CommunicationTCP(QObject):
         self.initSocketClient()
         self.startServer()
 
+        self.public_key_rsa = None
         # self.connectToServer()
+
+    def setPublicKeyRSA(self, pub_rsa_):
+        self.public_key_rsa = pub_rsa_
 
     def initSocketServer(self):
         self.socket_tcp_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -58,8 +63,11 @@ class CommunicationTCP(QObject):
 
     def startServerThread(self):
         print("COMM : SERVER WAITING FOR CONNECTION")
-
+        is_key_sent = False
         while self.is_server_running:
+            if self.is_client_connected_to_server:
+                time.sleep(1)
+                continue
             if not self.is_server_connected_to_client:
                 self.initSocketServer()
                 try:
@@ -68,6 +76,7 @@ class CommunicationTCP(QObject):
                     print('Connected by', self.addr_tcp)
                     self.is_server_connected_to_client = True
                     self.getIncomingConnection.emit(self.addr_tcp[0])
+                    self.sendMessageToClient("RSA_KEY," + str(self.public_key_rsa[0]) + "," + str(self.public_key_rsa[1]))
                 except:
                     print("COMM : SERVER Timeout Waiting")
                     self.is_server_connected_to_client = False
@@ -77,14 +86,21 @@ class CommunicationTCP(QObject):
             else:
                 self.data_mtx.acquire()
                 data = self.conn_tcp.recv(1024)
+                data_plain = data.decode()
                 self.data_mtx.release()
 
-                self.getMessageData.emit(data.decode())
+                if len(data_plain) > 0:
+                    if data_plain[:7] == "RSA_KEY":
+                        print("GOT RSA KEY FROM CLIENT")
+                        split_data = data_plain.split(',')
+                        self.getAccRSAPubKey.emit(split_data)
+                    else:
+                        self.getMessageData.emit(data.decode())
 
                 if len(data) <= 0:
                     self.counter_timeout += 1
                     time.sleep(0.1)
-                    if self.counter_timeout > 20:
+                    if self.counter_timeout > 100:
                         self.counter_timeout = 0
                         self.conn_tcp.close()
                         self.is_server_connected_to_client = False
@@ -151,16 +167,28 @@ class CommunicationTCP(QObject):
         pass
 
     def startListeningToServerThread(self):
+        counter_error = 0
         while self.is_client_running and self.is_client_connected_to_server and not self.is_server_connected_to_client:
             # msg_to_send = "COMM : init conn"
             try:
                 # self.socket_tcp_client.sendall(msg_to_send.encode())
                 data = self.socket_tcp_client.recv(1024)
-                print('COMM : Received client = ', (data).decode())
-                if len(data.decode()) > 0:
-                    self.getMessageData.emit(data.decode())
+                data_plain = (data).decode()
+                print('COMM : Received client = ', data_plain)
+
+                if len(data_plain) > 0:
+                    if data_plain[:7] == "RSA_KEY":
+                        print("GOT RSA KEY FROM SERVER")
+                        split_data = data_plain.split(',')
+                        self.getAccRSAPubKey.emit(split_data)
+                        self.sendMessageToServer("RSA_KEY," + str(self.public_key_rsa[0]) + "," + str(self.public_key_rsa[1]))
+                    else:
+                        self.getMessageData.emit(data.decode())
             except:
-                print("COMM : Client ERROR recv")
+                counter_error += 1
+                if counter_error >= 10:
+                    print("COMM : Client ERROR recv")
+                    counter_error = 0
                 # self.socket_tcp_client.close()
                 # self.is_client_connected_to_server = False
                 # self.initSocketClient()
